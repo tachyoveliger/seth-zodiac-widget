@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Zodiac Toy</title>
+  <title>Seth Zodiac Terminal</title>
   <style>
     /* Terminal base */
     body {
@@ -54,7 +54,16 @@
     #input-wrapper {
       position: absolute;
       top: 0;
-      left: 34ch; /* adjust to align cursor/input under label */
+      left: 34ch; /* adjust as needed */
+    }
+
+    /* Invisible real input to summon keyboard */
+    #hidden-input {
+      position: absolute;
+      top: 0; left: 0;
+      width: 4ch; height: 1em;
+      opacity: 0; border: none;
+      background: none; z-index: 1;
     }
 
     /* Typed input buffer */
@@ -89,6 +98,13 @@
     <div id="seth-prompt">
       <span id="seth-label">Please, enter your birth month...</span>
       <span id="input-wrapper">
+        <input
+          id="hidden-input"
+          type="text"
+          inputmode="numeric"
+          pattern="[0-9]*"
+          autocomplete="off"
+        />
         <span id="seth-line"></span><span id="cursor">█</span>
       </span>
     </div>
@@ -97,6 +113,7 @@
   <pre id="seth-output"></pre>
 
   <script>
+    // ==== Data tables ====
     const elements   = ["water","earth","stone","air","metal","flesh","fire"];
     const daysInSeth = 343, daysInGreg = 365;
 
@@ -155,7 +172,7 @@
     const descriptions = {
       water: "Water, that which Wets the world and leaves it ready for new spawnings, that gouges at the Firmaments, that carries their weight. A time of bitter-sweetness, for it is the first month of waning, the timid, reluctant herald of approaching cold.",
       earth: "Earth, the stuff of things, the underfoot, that Pressure that holds the Firmaments in place, that holds and nurtures the deep writhing filaments of the world above in amniotic warmth, unseen and unrewarded. A stoic time, of preparation for what lies ahead, of pre-emptive goodbyes.",
-      stone: "Stone, the Firmament’s carapace, their teeth, their memory, Stone that wields horrible Crushing power, the best defence and the bleakest cell. A grim, grim time, with all heat leached from the world, the Sun’s single remaining Head meekish shivering, its back to the glowering vault for which it is named.",
+      stone: "Stone, the Firmament’s carapace, their teeth, their memory, Stone that wields horrible Crushing power, the best defense and the bleakest cell. A grim, grim time, with all heat leached from the world, the Sun’s single remaining Head meekish shivering, its back to the glowering vault for which it is named.",
       air:   "Air, untouchable, unseeable, but always-touching, always-seen. The breath of the Firmaments, a rich solution of powerful, volatile fuels that enrich the bodies of living things, that carry rot and the scent of gore over vast swathes, that simply cannot be lived without. A neutral Head, a time of quietude and reconciliation after the trials of its heavy predecessor. Not warm, but warming.",
       metal:"Metal, the many-folded, the supple and strong, the made-strong by hard beatings and intense pain. The Firmaments’ tortured child, born first of the year, Dazing in bright shearing notes. The inflictor of intense pain, the inflictor of hard beatings. A time of rearing up, of wounds turned to scars, baked in the rising heat, now hardy rough callouses.",
       flesh:"Flesh, the Throbbing. The hearty second heir, the inheritor of the Firmaments. Assured of victory, of its own invincibility. The one who feels pain, who feels everything, without whom there is no feeling, without whom there is nothing to die. A time of sensation, of real heat, flourishing, pleasure, endless pleasure. A time of ignoring what is to come.",
@@ -215,34 +232,67 @@
       return out;
     }
 
-    let step = 1, monthValue = null, inputBuffer = "";
-    const labelSpan = document.getElementById("seth-label");
-    const lineSpan  = () => document.getElementById("seth-line");
-    const output    = document.getElementById("seth-output");
+    // ==== Interaction logic ====
+    let step = 1,
+        monthValue = null,
+        inputBuffer = "";
 
-    function resetPrompt() {
-      step = 1; monthValue = null; inputBuffer = "";
-      labelSpan.textContent = "Please, enter your birth month...";
-      lineSpan().textContent = "";
-      output.textContent = "";
+    const labelSpan   = document.getElementById("seth-label");
+    const lineSpan    = () => document.getElementById("seth-line");
+    const output      = document.getElementById("seth-output");
+    const hiddenInput = document.getElementById("hidden-input");
+
+    function focusHidden() {
+      hiddenInput.focus();
     }
 
-    document.addEventListener("keydown", e => {
+    function resetPrompt() {
+      step = 1;
+      monthValue = null;
+      inputBuffer = "";
+      labelSpan.textContent = "Please, enter your birth month...";
+      lineSpan().textContent = "";
+      output.textContent   = "";
+      hiddenInput.value    = "";
+      focusHidden();
+    }
+
+    // Sync real input → buffer/display
+    hiddenInput.addEventListener("input", e => {
+      inputBuffer        = e.target.value.replace(/\D/g, "");
+      e.target.value     = inputBuffer;
+      lineSpan().textContent = inputBuffer;
+    });
+
+    // Handle keys
+    hiddenInput.addEventListener("keydown", e => {
       const key = e.key;
-      if (key === "Escape") { resetPrompt(); return; }
+
+      if (key === "Escape") {
+        e.preventDefault();
+        resetPrompt();
+        return;
+      }
+
       if (key === "Backspace") {
         e.preventDefault();
         inputBuffer = inputBuffer.slice(0, -1);
+        hiddenInput.value = inputBuffer;
         lineSpan().textContent = inputBuffer;
         return;
       }
+
       if (key === "Enter") {
         e.preventDefault();
         const val = parseInt(inputBuffer, 10);
-        inputBuffer = ""; lineSpan().textContent = "";
+        inputBuffer       = "";
+        hiddenInput.value = "";
+        lineSpan().textContent = "";
+
         if (step === 1) {
           if (val >= 1 && val <= 12) {
-            monthValue = val; step = 2;
+            monthValue = val;
+            step = 2;
             labelSpan.textContent = "Please, enter your birth day...";
           } else {
             labelSpan.textContent = "Month must be 1–12. Try again...";
@@ -250,23 +300,21 @@
         } else {
           if (val >= 1 && val <= 31) {
             output.textContent = generateSeth(monthValue, val);
-            step = 1; monthValue = null;
+            step = 1;
+            monthValue = null;
             labelSpan.textContent = "Please, enter your birth month...";
           } else {
             labelSpan.textContent = "Day must be 1–31. Try again...";
           }
         }
+
+        focusHidden();
         return;
       }
-      if (/^[0-9]$/.test(key)) {
-        e.preventDefault();
-        inputBuffer += key;
-        lineSpan().textContent = inputBuffer;
-      }
+      // digits automatically handled by input event
     });
 
-    window.onload = () => window.focus();
+    window.onload = focusHidden;
   </script>
-
 </body>
 </html>
