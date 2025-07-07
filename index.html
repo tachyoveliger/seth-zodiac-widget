@@ -2,57 +2,102 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Seth Zodiac Toy</title>
+  <title>Seth Zodiac Terminal</title>
   <style>
+    /* Terminal base */
     body {
-      font-family: sans-serif;
+      background-color: #000;
+      color: #fff;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1rem;
+      font-weight: normal;
+      -webkit-font-smoothing: none;
       padding: 1rem;
       max-width: 600px;
       margin: auto;
+      position: relative;
     }
-    form {
-      margin-bottom: 1rem;
-      padding: .5rem;
-      background: #f0f0f0;
-      border-radius: 4px;
+
+    /* Uniform font settings */
+    #reset-hint,
+    #seth-label,
+    #seth-line,
+    #cursor,
+    #seth-output {
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
     }
-    label {
-      display: block;
-      margin: .5rem 0;
+
+    /* ESC reset hint */
+    #reset-hint {
+      position: absolute;
+      top: 0.5rem;
+      right: 1rem;
+      font-size: 0.8rem;
+      color: #888;
     }
-    button {
-      margin-top: .5rem;
-      padding: .4rem .8rem;
-      font-size: 1rem;
+
+    /* Prompt container */
+    #seth-prompt {
+      position: relative;
+      white-space: pre;
+      margin-bottom: 0.5rem;
     }
-    pre {
-      background: #fafafa;
-      padding: .8rem;
+
+    /* Prompt text */
+    #seth-label {
+      display: inline-block;
+    }
+
+    /* Fixed-position input & cursor */
+    #input-wrapper {
+      position: absolute;
+      top: 0;
+      left: 34ch; /* adjust to align cursor/input under label */
+    }
+
+    /* Typed input buffer */
+    #seth-line {
+      display: inline-block;
+      min-width: 2ch;
+    }
+
+    /* Blinking cursor */
+    #cursor {
+      margin-left: 0.2em;
+      animation: blink 1s steps(2, start) infinite;
+    }
+    @keyframes blink { to { visibility: hidden; } }
+
+    /* Output aligned at left margin */
+    #seth-output {
       white-space: pre-wrap;
-      border: 1px solid #ddd;
-      border-radius: 4px;
+      margin: 1rem 0 0 0;
+      background: transparent;
+      border: none;
+      padding: 0;
+      text-align: left;
     }
   </style>
 </head>
 <body>
 
-  <form id="seth-form">
-    <label>
-      Month (MM):
-      <input type="number" id="seth-month" min="1" max="12" required>
-    </label>
-    <label>
-      Day (DD):
-      <input type="number" id="seth-day" min="1" max="31" required>
-    </label>
-    <button type="submit">Reveal My Seth-Zodiac</button>
-  </form>
+  <div id="reset-hint">Press ESC to reset</div>
+
+  <div id="seth-interaction">
+    <div id="seth-prompt">
+      <span id="seth-label">Please, enter your birth month...</span>
+      <span id="input-wrapper">
+        <span id="seth-line"></span><span id="cursor">█</span>
+      </span>
+    </div>
+  </div>
 
   <pre id="seth-output"></pre>
 
   <script>
-    // ==== Data tables ====
-    const elements = ["water","earth","stone","air","metal","flesh","fire"];
+    const elements   = ["water","earth","stone","air","metal","flesh","fire"];
     const daysInSeth = 343, daysInGreg = 365;
 
     const divinations = {
@@ -62,8 +107,7 @@
       "water,metal":"Death, the Dying.",
       "water,flesh":"Blood, the carrier of things, the lack of which causes Poor Humour.",
       "water,fire":"Acid, the breaker of things, that Scalds and disfigures.",
-      "water,water":"Water, either pure or in its cryptic form- Slime, from out of which all things slip.",
-
+      "water,water":"Water, either pure or in its cryptic form- Slime, from out of which all things Ooze.",
       "earth,water":"The Amphibian, the Swampy of aspect, the border-dweller.",
       "earth,earth":"Earth, either pure or in its cryptic form- Fold, the unseen bowels of lurking caverns.",
       "earth,stone":"Obsidian, the glassy-eyed, the surgeon that opens the body up without the intent to restore it.",
@@ -71,7 +115,6 @@
       "earth,metal":"Celestial, the stuff of the stars, the striker, that watches from its nestled webs above.",
       "earth,flesh":"Fungus, that which feeds on Death, that which lies hidden in the bodies of others, Parasite.",
       "earth,fire":"Ash, the scattered remains of things, the Ashen.",
-
       "stone,water":"Oil, the lubricator, that which suspends, and that which leaves things Greasy.",
       "stone,earth":"Darkness, the senseless, the domain of the Dreaming.",
       "stone,stone":"Stone, either pure or in its cryptic form- Carbon, the larder of the world.",
@@ -79,7 +122,6 @@
       "stone,metal":"Vorpal, the uninhibited, the destroyer of Death, the Mutator.",
       "stone,flesh":"Bone, that which buttresses, bites, breaks, and Bleeds.",
       "stone,fire":"Plasma, the Lightning-Eater, the destroyer of Metal, the Galvanised.",
-
       "air,water":"Moon, the maddened Lunatic locked away in the night sky by supple rings, the outsider, the eye that looks kindly down, hated of the Sun.",
       "air,earth":"Salt, the destroyer of Plague and banisher of Disease, that which is Immune.",
       "air,stone":"Sand, the at-once-small-and-vast, the eater of Fire and Water alike, that which Entombs.",
@@ -87,7 +129,6 @@
       "air,metal":"Magna, the will of things, the architecture of the cosmos, awesome, terrifying power that Shakes and Emboldens.",
       "air,flesh":"Plague, the wafting, spreading, festering of Disease.",
       "air,fire":"Sun, the Seven-Headed Father of All, the lonely tyrant, the giver-and-taker, the tireless one, the Moon-Foe, in which might be found Solace.",
-
       "metal,water":"Mercury, the untouchable, that which wears slick and shining Chrome.",
       "metal,earth":"alpha/decay, the inevitable unbound, the terrible bringer of dreaded Half-Life.",
       "metal,stone":"Time, the Accelerator, the Deccelerator, the oldest of brutes, the fallowed bed of love, the only thing that ever really happens.",
@@ -95,7 +136,6 @@
       "metal,metal":"Metal, either pure or in its cryptic form- Steel, the Tempered.",
       "metal,flesh":"Pain. Total, Agonising Pain.",
       "metal,fire":"War, the destroyer of all, the ruiner, that takes good, whole minds and sunders them Berserk.",
-
       "flesh,water":"Fish, the scaled and Gilled master of the deep, Water-Eater, ever-watchful and quick to action.",
       "flesh,earth":"Plant, the ravenous, the always-Growing, the eater of Light, Water, Ash, and Earth.",
       "flesh,stone":"Insect, the ancient, armoured one, the weaver of silken Coccoons and speaker of unheard voice.",
@@ -103,7 +143,6 @@
       "flesh,metal":"Reptile, that which is Cold-Blooded, the eater of Fire, the motherless, stoic and cruel.",
       "flesh,flesh":"Flesh, either pure or in its cryptic form- the terrible Prion, the saw, the Unfolded, that saws and Unfolds and saws and Unfolds...",
       "flesh,fire":"Mammal, the hot-blooded, the born-blind, the always-running, always-raging, driven by hungry Libido, the protector of cubs.",
-
       "fire,water":"Molten, that which is the slow, deadly furor, the unstoppable discharge of hidden heat, that eats the very Stone of the land, that Melts.",
       "fire,earth":"Clay, that which is shapeless and Malleable, and never one thing nor one thing other.",
       "fire,stone":"Nitro, the Exploding, the moment, the launch, the trigger-pull, the blasting-off of sound and fury.",
@@ -149,7 +188,6 @@
       27:"Twenty-Seventh",28:"Twenty-Eighth",29:"Twenty-Ninth",30:"Thirtieth",31:"Thirty-First"
     };
 
-    // ==== Core generator ====
     function generateSeth(m, d) {
       const today = new Date();
       const bday  = new Date(today.getFullYear(), m-1, d);
@@ -163,7 +201,6 @@
       const B         = elements[songIdx];
       const head      = A.charAt(0).toUpperCase() + A.slice(1);
       const song      = B.charAt(0).toUpperCase() + B.slice(1);
-
       const desc      = descriptions[A].slice(head.length);
       const dayInHead = ((seth - 1) % 49) + 1;
       const tarot     = tarots[B];
@@ -175,19 +212,61 @@
       out += `They formed the Tarot known as The ${tarot}\n\n`;
       out += `Through alchemical confabulation, the combination of ${head} and ${song}, the Seven Heavens `;
       out += `let slip divine birth of your true elemental affinity, the matter of your soul:\n\n${divine}`;
-
       return out;
     }
 
-    // ==== Wire up form ====
-    document
-      .getElementById("seth-form")
-      .addEventListener("submit", e => {
+    let step = 1, monthValue = null, inputBuffer = "";
+    const labelSpan = document.getElementById("seth-label");
+    const lineSpan  = () => document.getElementById("seth-line");
+    const output    = document.getElementById("seth-output");
+
+    function resetPrompt() {
+      step = 1; monthValue = null; inputBuffer = "";
+      labelSpan.textContent = "Please, enter your birth month...";
+      lineSpan().textContent = "";
+      output.textContent = "";
+    }
+
+    document.addEventListener("keydown", e => {
+      const key = e.key;
+      if (key === "Escape") { resetPrompt(); return; }
+      if (key === "Backspace") {
         e.preventDefault();
-        const m = parseInt(document.getElementById("seth-month").value, 10);
-        const d = parseInt(document.getElementById("seth-day").value, 10);
-        document.getElementById("seth-output").textContent = generateSeth(m, d);
-      });
+        inputBuffer = inputBuffer.slice(0, -1);
+        lineSpan().textContent = inputBuffer;
+        return;
+      }
+      if (key === "Enter") {
+        e.preventDefault();
+        const val = parseInt(inputBuffer, 10);
+        inputBuffer = ""; lineSpan().textContent = "";
+        if (step === 1) {
+          if (val >= 1 && val <= 12) {
+            monthValue = val; step = 2;
+            labelSpan.textContent = "Please, enter your birth day...";
+          } else {
+            labelSpan.textContent = "Month must be 1–12. Try again...";
+          }
+        } else {
+          if (val >= 1 && val <= 31) {
+            output.textContent = generateSeth(monthValue, val);
+            step = 1; monthValue = null;
+            labelSpan.textContent = "Please, enter your birth month...";
+          } else {
+            labelSpan.textContent = "Day must be 1–31. Try again...";
+          }
+        }
+        return;
+      }
+      if (/^[0-9]$/.test(key)) {
+        e.preventDefault();
+        inputBuffer += key;
+        lineSpan().textContent = inputBuffer;
+      }
+    });
+
+    window.onload = () => window.focus();
   </script>
+
 </body>
 </html>
