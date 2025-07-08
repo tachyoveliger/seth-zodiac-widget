@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
+  <meta charset="UTF-8">
   <title>Seth Zodiac Terminal</title>
   <style>
-    /* Terminal base */
     body {
       background: #000;
       color: #fff;
@@ -16,84 +15,73 @@
       position: relative;
     }
 
-    /* Uniform font & baseline */
-    #reset-hint,
-    #seth-label,
-    #seth-line,
-    #cursor,
-    #hidden-input,
-    #seth-output {
-      font: inherit;
-      line-height: 1em;
-      vertical-align: middle;
-    }
-
-    /* ESC reset hint */
-    #reset-hint {
+    /* Reset button */
+    #reset-btn {
       position: absolute;
       top: 0.5rem;
       right: 1rem;
-      font-size: 0.8rem;
+      background: none;
+      border: none;
       color: #888;
+      font: inherit;
+      cursor: pointer;
+    }
+    #reset-btn:hover {
+      color: #bbb;
     }
 
-    /* Prompt container */
-    #seth-prompt {
-      position: relative;
+    /* Prompt lines */
+    .prompt-line {
       white-space: pre;
       margin-bottom: 0.5rem;
     }
-    #seth-label {
+    .prompt-text {
       display: inline-block;
     }
-
-    /* Fixed‐position input & cursor */
-    #input-wrapper {
-      position: absolute;
-      top: 0;
-      left: 34ch;
-    }
-    #input-wrapper span {
-      pointer-events: none; /* let taps fall through */
+    .input-wrapper {
+      display: inline-block;
+      position: relative;
     }
 
-    /* Invisible real input for mobile/keyboard focus */
-    #hidden-input {
+    /* Invisible real input for focus */
+    .input-wrapper input {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 4ch;
-      height: 1em;
+      top: 0; left: 0;
+      width: 4ch; height: 1em;
       opacity: 0;
       border: none;
       background: none;
-      z-index: 99;
+      z-index: 1;
       pointer-events: all;
+      font: inherit;
+      line-height: 1em;
     }
-    /* hide number input spinners */
-    #hidden-input::-webkit-inner-spin-button,
-    #hidden-input::-webkit-outer-spin-button {
+    .input-wrapper input::-webkit-inner-spin-button,
+    .input-wrapper input::-webkit-outer-spin-button {
       -webkit-appearance: none;
       margin: 0;
     }
 
-    /* Fake typed input */
-    #seth-line {
+    /* User text and cursor */
+    .user-input, .cursor {
       display: inline-block;
-      min-width: 2ch;
+      vertical-align: middle;
+      line-height: 1em;
+      pointer-events: none;
+      z-index: 2;
     }
-
-    /* Blinking cursor */
-    #cursor {
+    .cursor {
       margin-left: 0.2em;
       animation: blink 1s steps(2, start) infinite;
     }
-    @keyframes blink { to { visibility: hidden; } }
+    @keyframes blink {
+      to { visibility: hidden; }
+    }
 
-    /* Output aligned under prompt start */
+    /* Output */
     #seth-output {
       white-space: pre-wrap;
-      margin: 1rem 0 0 0;
+      margin-top: 1rem;
       background: transparent;
       border: none;
       padding: 0;
@@ -103,33 +91,14 @@
 </head>
 <body>
 
-  <div id="reset-hint">Press ESC to reset</div>
-
-  <div id="seth-interaction">
-    <div id="seth-prompt">
-      <span id="seth-label">Please, enter your birth month...</span>
-      <span id="input-wrapper">
-        <input
-          id="hidden-input"
-          type="number"
-          inputmode="numeric"
-          pattern="[0-9]*"
-          maxlength="2"
-          autocomplete="off"
-        />
-        <span id="seth-line"></span><span id="cursor">█</span>
-      </span>
-    </div>
-  </div>
-
+  <button id="reset-btn">Reset</button>
+  <div id="seth-interaction"></div>
   <pre id="seth-output"></pre>
 
   <script>
     // ==== Data tables ====
     const elements   = ["water","earth","stone","air","metal","flesh","fire"];
-    const daysInSeth = 343,
-          daysInGreg = 365;
-
+    const daysInSeth = 343, daysInGreg = 365;
     const divinations = {
       "water,earth":"Mud, that which makes what it touches Blind and Dirty.",
       "water,stone":"Ice, that which freezes and makes Frozen.",
@@ -138,7 +107,6 @@
       "water,flesh":"Blood, the carrier of things, the lack of which causes Poor Humour.",
       "water,fire":"Acid, the breaker of things, that Scalds and disfigures.",
       "water,water":"Water, either pure or in its cryptic form- Slime, from out of which all things Ooze.",
-
       "earth,water":"The Amphibian, the Swampy of aspect, the border-dweller.",
       "earth,earth":"Earth, either pure or in its cryptic form- Fold, the unseen bowels of lurking caverns.",
       "earth,stone":"Obsidian, the glassy-eyed, the surgeon that opens the body up without the intent to restore it.",
@@ -146,7 +114,6 @@
       "earth,metal":"Celestial, the stuff of the stars, the striker, that watches from its nestled webs above.",
       "earth,flesh":"Fungus, that which feeds on Death, that which lies hidden in the bodies of others, Parasite.",
       "earth,fire":"Ash, the scattered remains of things, the Ashen.",
-
       "stone,water":"Oil, the lubricator, that which suspends, and that which leaves things Greasy.",
       "stone,earth":"Darkness, the senseless, the domain of the Dreaming.",
       "stone,stone":"Stone, either pure or in its cryptic form- Carbon, the larder of the world.",
@@ -154,7 +121,6 @@
       "stone,metal":"Vorpal, the uninhibited, the destroyer of Death, the Mutator.",
       "stone,flesh":"Bone, that which buttresses, bites, breaks, and Bleeds.",
       "stone,fire":"Plasma, the Lightning-Eater, the destroyer of Metal, the Galvanised.",
-
       "air,water":"Moon, the maddened Lunatic locked away in the night sky by supple rings, the outsider, the eye that looks kindly down, hated of the Sun.",
       "air,earth":"Salt, the destroyer of Plague and banisher of Disease, that which is Immune.",
       "air,stone":"Sand, the at-once-small-and-vast, the eater of Fire and Water alike, that which Entombs.",
@@ -162,7 +128,6 @@
       "air,metal":"Magna, the will of things, the architecture of the cosmos, awesome, terrifying power that Shakes and Emboldens.",
       "air,flesh":"Plague, the wafting, spreading, festering of Disease.",
       "air,fire":"Sun, the Seven-Headed Father of All, the lonely tyrant, the giver-and-taker, the tireless one, the Moon-Foe, in which might be found Solace.",
-
       "metal,water":"Mercury, the untouchable, that which wears slick and shining Chrome.",
       "metal,earth":"alpha/decay, the inevitable unbound, the terrible bringer of dreaded Half-Life.",
       "metal,stone":"Time, the Accelerator, the Deccelerator, the oldest of brutes, the fallowed bed of love, the only thing that ever really happens.",
@@ -170,17 +135,20 @@
       "metal,metal":"Metal, either pure or in its cryptic form- Steel, the Tempered.",
       "metal,flesh":"Pain. Total, Agonising Pain.",
       "metal,fire":"War, the destroyer of all, the ruiner, that takes good, whole minds and sunders them Berserk.",
-
       "flesh,water":"Fish, the scaled and Gilled master of the deep, Water-Eater, ever-watchful and quick to action.",
       "flesh,earth":"Plant, the ravenous, the always-Growing, the eater of Light, Water, Ash, and Earth.",
       "flesh,stone":"Insect, the ancient, armoured one, the weaver of silken Coccoons and speaker of unheard voice.",
       "flesh,air":"Bird, that which is free. Hollow-Boned and fleeting, of unparalleled agility and aplomb.",
       "flesh,metal":"Reptile, that which is Cold-Blooded, the eater of Fire, the motherless, stoic and cruel.",
-      "flesh,flesh":"Flesh, either pure or in its cryptic form- the terrible Prion, the saw, the Unfolded, that saws and Unfolds and saws and Unfolds...","flesh,fire":"Mammal, the hot-blooded, the born-blind, the always-running, always-raging, driven by hungry Libido, the protector of cubs.",
-
+      "flesh,flesh":"Flesh, either pure or in its cryptic form- the terrible Prion, the saw, the Unfolded, that saws and Unfolds and saws and Unfolds...",
+      "flesh,fire":"Mammal, the hot-blooded, the born-blind, the always-running, always-raging, driven by hungry Libido, the protector of cubs.",
       "fire,water":"Molten, that which is the slow, deadly furor, the unstoppable discharge of hidden heat, that eats the very Stone of the land, that Melts.",
       "fire,earth":"Clay, that which is shapeless and Malleable, and never one thing nor one thing other.",
-      "fire,stone":"Nitro, the Exploding, the moment, the launch, the trigger-pull, the blasting-off of sound and fury.","fire,air":"Light, the Enlightened. The destroyer of Darkness and Dreaming, the shower-of-the-way.","fire,metal":"Spark, the Bright flash of ingenuity and innovation. The need to keep building, at any cost.","fire,flesh":"Venom, the destroyer of Blood, the Eater of Bone. Insidious and subtle, the gauntleted seizer of heart and guts.","fire,fire":"Phoenix, the Fizzing, Fusing, dazzling corona that eats itself to burn ever-brighter, ever-fiercer, ever-spreading, such that more be razed by its glory, on and on..."
+      "fire,stone":"Nitro, the Exploding, the moment, the launch, the trigger-pull, the blasting-off of sound and fury.",
+      "fire,air":"Light, the Enlightened. The destroyer of Darkness and Dreaming, the shower-of-the-way.",
+      "fire,metal":"Spark, the Bright flash of ingenuity and innovation. The need to keep building, at any cost.",
+      "fire,flesh":"Venom, the destroyer of Blood, the Eater of Bone. Insidious and subtle, the gauntleted seizer of heart and guts.",
+      "fire,fire":"Phoenix, the Fizzing, Fusing, dazzling corona that eats itself to burn ever-brighter, ever-fiercer, ever-spreading, such that more be razed by its glory, on and on..."
     };
 
     const descriptions = {
@@ -210,19 +178,11 @@
       "September","October","November","December"
     ];
 
-    const ordinals = {
-      1:"First",2:"Second",3:"Third",4:"Fourth",5:"Fifth",6:"Sixth",
-      7:"Seventh",8:"Eighth",9:"Ninth",10:"Tenth",11:"Eleventh",12:"Twelfth",
-      13:"Thirteenth",14:"Fourteenth",15:"Fifteenth",16:"Sixteenth",17:"Seventeenth",18:"Eighteenth",
-      19:"Nineteenth",20:"Twentieth",21:"Twenty-First",22:"Twenty-Second",
-      23:"Twenty-Third",24:"Twenty-Fourth",25:"Twenty-Fifth",26:"Twenty-Sixth",
-      27:"Twenty-Seventh",28:"Twenty-Eighth",29:"Twenty-Ninth",30:"Thirtieth",31:"Thirty-First"
-    };
+    const ordinals = {1:"First",2:"Second",3:"Third",4:"Fourth",5:"Fifth",6:"Sixth",7:"Seventh",8:"Eighth",9:"Ninth",10:"Tenth",11:"Eleventh",12:"Twelfth",13:"Thirteenth",14:"Fourteenth",15:"Fifteenth",16:"Sixteenth",17:"Seventeenth",18:"Eighteenth",19:"Nineteenth",20:"Twentieth",21:"Twenty-First",22:"Twenty-Second",23:"Twenty-Third",24:"Twenty-Fourth",25:"Twenty-Fifth",26:"Twenty-Sixth",27:"Twenty-Seventh",28:"Twenty-Eighth",29:"Twenty-Ninth",30:"Thirtieth",31:"Thirty-First"};
 
-    // ==== Core generator ====
     function generateSeth(m, d) {
       const today = new Date();
-      const bday  = new Date(today.getFullYear(), m - 1, d);
+      const bday  = new Date(today.getFullYear(), m-1, d);
       const start = new Date(today.getFullYear(), 0, 1);
       const doy   = Math.ceil((bday - start + 1) / 86400000);
       const seth  = Math.floor((doy - 1) * daysInSeth / daysInGreg) + 1;
@@ -247,76 +207,112 @@
       return out;
     }
 
-    // ==== Interaction logic (auto-advance) ====
-    let step      = 1;
-    let monthVal  = null;
-    const labelEl = document.getElementById("seth-label");
-    const lineEl  = () => document.getElementById("seth-line");
-    const outEl   = document.getElementById("seth-output");
-    const inp     = document.getElementById("hidden-input");
+    // ==== Interaction logic ====
+    const interaction = document.getElementById("seth-interaction");
+    const output      = document.getElementById("seth-output");
+    const resetBtn    = document.getElementById("reset-btn");
+    let step = 1, monthVal = null;
+    let currWrapper, currInput, currUser, currCursor;
 
-    function focusInput() {
-      inp.focus();
+    function addPrompt(text) {
+      const line = document.createElement("div");
+      line.className = "prompt-line";
+      const label = document.createElement("span");
+      label.className = "prompt-text";
+      label.textContent = text;
+      const wrapper = document.createElement("span");
+      wrapper.className = "input-wrapper";
+      const inp = document.createElement("input");
+      inp.type = "number";
+      inp.inputMode = "numeric";
+      inp.pattern = "[0-9]*";
+      inp.maxLength = 2;
+      inp.autocomplete = "off";
+      const user = document.createElement("span");
+      user.className = "user-input";
+      const cursor = document.createElement("span");
+      cursor.className = "cursor";
+      cursor.textContent = "█";
+      wrapper.append(inp, user, cursor);
+      line.append(label, " ", wrapper);
+      interaction.append(line);
+      return { wrapper, inp, user, cursor };
     }
 
-    function resetPrompt() {
-      step     = 1;
+    function reset() {
+      step = 1;
       monthVal = null;
-      labelEl.textContent = "Please, enter your birth month...";
-      lineEl().textContent  = "";
-      outEl.textContent     = "";
-      inp.value             = "";
-      focusInput();
+      interaction.innerHTML = "";
+      output.textContent = "";
+      createPrompt("Please, enter your birth month...");
     }
 
-    inp.addEventListener("input", e => {
-      // keep only digits, max 2 chars
+    function createPrompt(text) {
+      const prompt = addPrompt(text);
+      currWrapper = prompt.wrapper;
+      currInput   = prompt.inp;
+      currUser    = prompt.user;
+      currCursor  = prompt.cursor;
+      currInput.value = "";
+      currUser.textContent = "";
+      currInput.addEventListener("input", onInput);
+      currInput.addEventListener("keydown", onKeyDown);
+      currInput.focus();
+    }
+
+    function finishLine() {
+      currWrapper.removeChild(currInput);
+      currWrapper.removeChild(currCursor);
+      currInput.removeEventListener("input", onInput);
+      currInput.removeEventListener("keydown", onKeyDown);
+    }
+
+    function onInput(e) {
       let buf = e.target.value.replace(/\D/g, "").slice(0, 2);
       e.target.value = buf;
-      lineEl().textContent = buf;
+      currUser.textContent = buf;
 
       if (step === 1) {
-        // month: 2 digits OR single non-"1" digit
         if (buf.length === 2 || (buf.length === 1 && buf !== "1")) {
           const m = +buf;
           if (m >= 1 && m <= 12) {
             monthVal = m;
+            finishLine();
             step = 2;
-            labelEl.textContent = "Please, enter your birth day...";
-            inp.value = "";
-            lineEl().textContent = "";
+            createPrompt("Please, enter your birth day...");
           } else {
-            labelEl.textContent = "Month must be 1–12. Try again...";
-            inp.value = "";
-            lineEl().textContent = "";
+            alert("Month must be 1–12");
+            currUser.textContent = "";
+            e.target.value = "";
           }
         }
       } else {
-        // day: 2 digits OR single digit >= "4"
         if (buf.length === 2 || (buf.length === 1 && buf >= "4")) {
           const d = +buf;
           if (d >= 1 && d <= 31) {
-            outEl.textContent = generateSeth(monthVal, d);
+            finishLine();
+            output.textContent = generateSeth(monthVal, d);
             step = 1;
             monthVal = null;
-            labelEl.textContent = "Please, enter your birth month...";
+            createPrompt("Please, enter your birth month...");
           } else {
-            labelEl.textContent = "Day must be 1–31. Try again...";
+            alert("Day must be 1–31");
+            currUser.textContent = "";
+            e.target.value = "";
           }
-          inp.value = "";
-          lineEl().textContent = "";
         }
       }
-    });
+    }
 
-    inp.addEventListener("keydown", e => {
+    function onKeyDown(e) {
       if (e.key === "Escape") {
         e.preventDefault();
-        resetPrompt();
+        reset();
       }
-    });
+    }
 
-    window.onload = focusInput;
+    resetBtn.addEventListener("click", reset);
+    window.onload = reset;
   </script>
 </body>
 </html>
