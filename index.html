@@ -43,7 +43,7 @@
       position: relative;
     }
 
-    /* Invisible real input for focus */
+    /* Invisible real input */
     .input-wrapper input {
       position: absolute;
       top: 0; left: 0;
@@ -69,6 +69,11 @@
       line-height: 1em;
       pointer-events: none;
       z-index: 2;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: grayscale;
     }
     .cursor {
       margin-left: 0.2em;
@@ -86,6 +91,13 @@
       border: none;
       padding: 0;
       text-align: left;
+      font-family: inherit;
+      font-size: inherit;
+      font-weight: inherit;
+      -webkit-font-smoothing: none;
+      -moz-osx-font-smoothing: grayscale;
+      line-height: 1em;
+      vertical-align: middle;
     }
   </style>
 </head>
@@ -98,7 +110,9 @@
   <script>
     // ==== Data tables ====
     const elements   = ["water","earth","stone","air","metal","flesh","fire"];
-    const daysInSeth = 343, daysInGreg = 365;
+    const daysInSeth = 343,
+          daysInGreg = 365;
+
     const divinations = {
       "water,earth":"Mud, that which makes what it touches Blind and Dirty.",
       "water,stone":"Ice, that which freezes and makes Frozen.",
@@ -107,6 +121,7 @@
       "water,flesh":"Blood, the carrier of things, the lack of which causes Poor Humour.",
       "water,fire":"Acid, the breaker of things, that Scalds and disfigures.",
       "water,water":"Water, either pure or in its cryptic form- Slime, from out of which all things Ooze.",
+
       "earth,water":"The Amphibian, the Swampy of aspect, the border-dweller.",
       "earth,earth":"Earth, either pure or in its cryptic form- Fold, the unseen bowels of lurking caverns.",
       "earth,stone":"Obsidian, the glassy-eyed, the surgeon that opens the body up without the intent to restore it.",
@@ -114,6 +129,7 @@
       "earth,metal":"Celestial, the stuff of the stars, the striker, that watches from its nestled webs above.",
       "earth,flesh":"Fungus, that which feeds on Death, that which lies hidden in the bodies of others, Parasite.",
       "earth,fire":"Ash, the scattered remains of things, the Ashen.",
+
       "stone,water":"Oil, the lubricator, that which suspends, and that which leaves things Greasy.",
       "stone,earth":"Darkness, the senseless, the domain of the Dreaming.",
       "stone,stone":"Stone, either pure or in its cryptic form- Carbon, the larder of the world.",
@@ -121,6 +137,7 @@
       "stone,metal":"Vorpal, the uninhibited, the destroyer of Death, the Mutator.",
       "stone,flesh":"Bone, that which buttresses, bites, breaks, and Bleeds.",
       "stone,fire":"Plasma, the Lightning-Eater, the destroyer of Metal, the Galvanised.",
+
       "air,water":"Moon, the maddened Lunatic locked away in the night sky by supple rings, the outsider, the eye that looks kindly down, hated of the Sun.",
       "air,earth":"Salt, the destroyer of Plague and banisher of Disease, that which is Immune.",
       "air,stone":"Sand, the at-once-small-and-vast, the eater of Fire and Water alike, that which Entombs.",
@@ -128,6 +145,7 @@
       "air,metal":"Magna, the will of things, the architecture of the cosmos, awesome, terrifying power that Shakes and Emboldens.",
       "air,flesh":"Plague, the wafting, spreading, festering of Disease.",
       "air,fire":"Sun, the Seven-Headed Father of All, the lonely tyrant, the giver-and-taker, the tireless one, the Moon-Foe, in which might be found Solace.",
+
       "metal,water":"Mercury, the untouchable, that which wears slick and shining Chrome.",
       "metal,earth":"alpha/decay, the inevitable unbound, the terrible bringer of dreaded Half-Life.",
       "metal,stone":"Time, the Accelerator, the Deccelerator, the oldest of brutes, the fallowed bed of love, the only thing that ever really happens.",
@@ -135,6 +153,7 @@
       "metal,metal":"Metal, either pure or in its cryptic form- Steel, the Tempered.",
       "metal,flesh":"Pain. Total, Agonising Pain.",
       "metal,fire":"War, the destroyer of all, the ruiner, that takes good, whole minds and sunders them Berserk.",
+
       "flesh,water":"Fish, the scaled and Gilled master of the deep, Water-Eater, ever-watchful and quick to action.",
       "flesh,earth":"Plant, the ravenous, the always-Growing, the eater of Light, Water, Ash, and Earth.",
       "flesh,stone":"Insect, the ancient, armoured one, the weaver of silken Coccoons and speaker of unheard voice.",
@@ -142,6 +161,7 @@
       "flesh,metal":"Reptile, that which is Cold-Blooded, the eater of Fire, the motherless, stoic and cruel.",
       "flesh,flesh":"Flesh, either pure or in its cryptic form- the terrible Prion, the saw, the Unfolded, that saws and Unfolds and saws and Unfolds...",
       "flesh,fire":"Mammal, the hot-blooded, the born-blind, the always-running, always-raging, driven by hungry Libido, the protector of cubs.",
+
       "fire,water":"Molten, that which is the slow, deadly furor, the unstoppable discharge of hidden heat, that eats the very Stone of the land, that Melts.",
       "fire,earth":"Clay, that which is shapeless and Malleable, and never one thing nor one thing other.",
       "fire,stone":"Nitro, the Exploding, the moment, the launch, the trigger-pull, the blasting-off of sound and fury.",
@@ -156,9 +176,9 @@
       earth: "Earth, the stuff of things, the underfoot, that Pressure that holds the Firmaments in place, that holds and nurtures the deep writhing filaments of the world above in amniotic warmth, unseen and unrewarded. A stoic time, of preparation for what lies ahead, of pre-emptive goodbyes.",
       stone: "Stone, the Firmament’s carapace, their teeth, their memory, Stone that wields horrible Crushing power, the best defense and the bleakest cell. A grim, grim time, with all heat leached from the world, the Sun’s single remaining Head meekish shivering, its back to the glowering vault for which it is named.",
       air:   "Air, untouchable, unseeable, but always-touching, always-seen. The breath of the Firmaments, a rich solution of powerful, volatile fuels that enrich the bodies of living things, that carry rot and the scent of gore over vast swathes, that simply cannot be lived without. A neutral Head, a time of quietude and reconciliation after the trials of its heavy predecessor. Not warm, but warming.",
-      metal:"Metal, the many-folded, the supple and strong, the made-strong by hard beatings and intense pain. The Firmaments’ tortured child, born first of the year, Dazing in bright shearing notes. The inflictor of intense pain, the inflictor of hard beatings. A time of rearing up, of wounds turned to scars, baked in the rising heat, now hardy rough callouses.",
-      flesh:"Flesh, the Throbbing. The hearty second heir, the inheritor of the Firmaments. Assured of victory, of its own invincibility. The one who feels pain, who feels everything, without whom there is no feeling, without whom there is nothing to die. A time of sensation, of real heat, flourishing, pleasure, endless pleasure. A time of ignoring what is to come.",
-      fire: "Fire, prodigious Fire! The hotter-than-all, the unmatched in power, the Burning of the Firmaments under their own glory, their maddened reverie. All Seven Heads scream in blazing mania, the frightful orchestra of apotheosis. That which destroys what it loves, what it loves to behold. A time of rising energy, fit-to-burst, of short tempers and hands that quick-hot snatch for drooling blades."
+      metal: "Metal, the many-folded, the supple and strong, the made-strong by hard beatings and intense pain. The Firmaments’ tortured child, born first of the year, Dazing in bright shearing notes. The inflictor of intense pain, the inflictor of hard beatings. A time of rearing up, of wounds turned to scars, baked in the rising heat, now hardy rough callouses.",
+      flesh: "Flesh, the Throbbing. The hearty second heir, the inheritor of the Firmaments. Assured of victory, of its own invincibility. The one who feels pain, who feels everything, without whom there is no feeling, without whom there is nothing to die. A time of sensation, of real heat, flourishing, pleasure, endless pleasure. A time of ignoring what is to come.",
+      fire:  "Fire, prodigious Fire! The hotter-than-all, the unmatched in power, the Burning of the Firmaments under their own glory, their maddened reverie. All Seven Heads scream in blazing mania, the frightful orchestra of apotheosis. That which destroys what it loves, what it loves to behold. A time of rising energy, fit-to-burst, of short tempers and hands that quick-hot snatch for drooling blades."
     };
 
     const tarots = {
@@ -173,30 +193,36 @@
 
     const monthNames = [
       null,
-      "January","February","March","April",
-      "May","June","July","August",
-      "September","October","November","December"
+      "January","February","March","April","May","June",
+      "July","August","September","October","November","December"
     ];
 
-    const ordinals = {1:"First",2:"Second",3:"Third",4:"Fourth",5:"Fifth",6:"Sixth",7:"Seventh",8:"Eighth",9:"Ninth",10:"Tenth",11:"Eleventh",12:"Twelfth",13:"Thirteenth",14:"Fourteenth",15:"Fifteenth",16:"Sixteenth",17:"Seventeenth",18:"Eighteenth",19:"Nineteenth",20:"Twentieth",21:"Twenty-First",22:"Twenty-Second",23:"Twenty-Third",24:"Twenty-Fourth",25:"Twenty-Fifth",26:"Twenty-Sixth",27:"Twenty-Seventh",28:"Twenty-Eighth",29:"Twenty-Ninth",30:"Thirtieth",31:"Thirty-First"};
+    const ordinals = {
+      1:"First",2:"Second",3:"Third",4:"Fourth",5:"Fifth",6:"Sixth",
+      7:"Seventh",8:"Eighth",9:"Ninth",10:"Tenth",11:"Eleventh",12:"Twelfth",
+      13:"Thirteenth",14:"Fourteenth",15:"Fifteenth",16:"Sixteenth",17:"Seventeenth",18:"Eighteenth",
+      19:"Nineteenth",20:"Twentieth",21:"Twenty-First",22:"Twenty-Second",
+      23:"Twenty-Third",24:"Twenty-Fourth",25:"Twenty-Fifth",26:"Twenty-Sixth",
+      27:"Twenty-Seventh",28:"Twenty-Eighth",29:"Twenty-Ninth",30:"Thirtieth",31:"Thirty-First"
+    };
 
+    // ==== Generator ====
     function generateSeth(m, d) {
-      const today = new Date();
-      const bday  = new Date(today.getFullYear(), m-1, d);
-      const start = new Date(today.getFullYear(), 0, 1);
-      const doy   = Math.ceil((bday - start + 1) / 86400000);
-      const seth  = Math.floor((doy - 1) * daysInSeth / daysInGreg) + 1;
+      const t  = new Date(),
+            b  = new Date(t.getFullYear(), m - 1, d),
+            s  = new Date(t.getFullYear(), 0, 1),
+            doy = Math.ceil((b - s + 1) / 86400000),
+            st  = Math.floor((doy - 1) * daysInSeth / daysInGreg) + 1;
 
-      const headIdx   = Math.floor((seth - 1) / 49);
-      const songIdx   = Math.floor(((seth - 1) % 49) / 7);
-      const A         = elements[headIdx];
-      const B         = elements[songIdx];
-      const head      = A.charAt(0).toUpperCase() + A.slice(1);
-      const song      = B.charAt(0).toUpperCase() + B.slice(1);
-      const desc      = descriptions[A].slice(head.length);
-      const dayInHead = ((seth - 1) % 49) + 1;
-      const tarot     = tarots[B];
-      const divine    = divinations[`${A},${B}`] || "...unclear.";
+      const hi = Math.floor((st - 1) / 49),
+            si = Math.floor(((st - 1) % 49) / 7),
+            A  = elements[hi], B = elements[si],
+            head = A.charAt(0).toUpperCase() + A.slice(1),
+            song = B.charAt(0).toUpperCase() + B.slice(1),
+            desc = descriptions[A].slice(head.length),
+            dayInHead = ((st - 1) % 49) + 1,
+            tarot = tarots[B],
+            divine = divinations[`${A},${B}`] || "...unclear.";
 
       let out = `${monthNames[m]} ${ordinals[d]}…\n\n`;
       out += `You were born under the head of ${head}${desc}\n\n`;
@@ -212,31 +238,38 @@
     const output      = document.getElementById("seth-output");
     const resetBtn    = document.getElementById("reset-btn");
     let step = 1, monthVal = null;
-    let currWrapper, currInput, currUser, currCursor;
+    let currInput, currUser, currCursor;
 
     function addPrompt(text) {
       const line = document.createElement("div");
       line.className = "prompt-line";
+
       const label = document.createElement("span");
       label.className = "prompt-text";
       label.textContent = text;
+
       const wrapper = document.createElement("span");
       wrapper.className = "input-wrapper";
+
       const inp = document.createElement("input");
       inp.type = "number";
       inp.inputMode = "numeric";
       inp.pattern = "[0-9]*";
       inp.maxLength = 2;
       inp.autocomplete = "off";
+
       const user = document.createElement("span");
       user.className = "user-input";
+
       const cursor = document.createElement("span");
       cursor.className = "cursor";
       cursor.textContent = "█";
+
       wrapper.append(inp, user, cursor);
       line.append(label, " ", wrapper);
       interaction.append(line);
-      return { wrapper, inp, user, cursor };
+
+      return { inp, user, cursor };
     }
 
     function reset() {
@@ -244,27 +277,26 @@
       monthVal = null;
       interaction.innerHTML = "";
       output.textContent = "";
-      createPrompt("Please, enter your birth month...");
+      createPrompt("Please, enter your birth month (1-12)...");
     }
 
     function createPrompt(text) {
-      const prompt = addPrompt(text);
-      currWrapper = prompt.wrapper;
-      currInput   = prompt.inp;
-      currUser    = prompt.user;
-      currCursor  = prompt.cursor;
-      currInput.value = "";
-      currUser.textContent = "";
-      currInput.addEventListener("input", onInput);
-      currInput.addEventListener("keydown", onKeyDown);
-      currInput.focus();
+      const { inp, user, cursor } = addPrompt(text);
+      currInput  = inp;
+      currUser   = user;
+      currCursor = cursor;
+      inp.value = "";
+      user.textContent = "";
+      inp.addEventListener("input", onInput);
+      inp.addEventListener("keydown", onKeyDown);
+      inp.focus();
     }
 
     function finishLine() {
-      currWrapper.removeChild(currInput);
-      currWrapper.removeChild(currCursor);
       currInput.removeEventListener("input", onInput);
       currInput.removeEventListener("keydown", onKeyDown);
+      currInput.remove();
+      currCursor.remove();
     }
 
     function onInput(e) {
@@ -279,22 +311,20 @@
             monthVal = m;
             finishLine();
             step = 2;
-            createPrompt("Please, enter your birth day...");
+            createPrompt("Please, enter your birth day (1-31)...");
           } else {
             alert("Month must be 1–12");
             currUser.textContent = "";
             e.target.value = "";
           }
         }
-      } else {
+      } else if (step === 2) {
         if (buf.length === 2 || (buf.length === 1 && buf >= "4")) {
           const d = +buf;
           if (d >= 1 && d <= 31) {
             finishLine();
             output.textContent = generateSeth(monthVal, d);
-            step = 1;
-            monthVal = null;
-            createPrompt("Please, enter your birth month...");
+            // do not create a new prompt until reset
           } else {
             alert("Day must be 1–31");
             currUser.textContent = "";
