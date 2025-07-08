@@ -15,52 +15,35 @@
       position: relative;
     }
     #reset-btn {
-      position: absolute;
-      top: .5rem;
-      right: 1rem;
-      background: none;
-      border: none;
-      color: #888;
-      font: inherit;
-      cursor: pointer;
+      position: absolute; top: .5rem; right: 1rem;
+      background: none; border: none;
+      color: #888; font: inherit; cursor: pointer;
     }
     #reset-btn:hover { color: #bbb; }
+
     .prompt-line {
-      white-space: pre;
-      margin-bottom: .5rem;
+      white-space: pre; margin-bottom: .5rem;
     }
     .prompt-text { display: inline-block; }
     .input-wrapper {
-      display: inline-block;
-      position: relative;
+      display: inline-block; position: relative;
     }
     .input-wrapper input {
-      position: absolute;
-      top: 0; left: 0;
-      width: 4ch; height: 1em;
-      opacity: 0;
-      border: none;
-      background: none;
-      z-index: 1;
-      pointer-events: all;
-      font: inherit;
-      line-height: 1em;
+      position: absolute; top: 0; left: 0;
+      width: 4ch; height: 1em; opacity: 0;
+      border: none; background: none;
+      font: inherit; line-height: 1em;
+      pointer-events: all; z-index: 1;
     }
     .input-wrapper input::-webkit-inner-spin-button,
     .input-wrapper input::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-      margin: 0;
+      -webkit-appearance: none; margin: 0;
     }
     .user-input, .cursor {
-      display: inline-block;
-      vertical-align: middle;
-      line-height: 1em;
-      pointer-events: none;
-      z-index: 2;
-      font-family: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      -webkit-font-smoothing: none;
+      display: inline-block; vertical-align: middle;
+      line-height: 1em; pointer-events: none; z-index: 2;
+      font-family: inherit; font-size: inherit;
+      font-weight: inherit; -webkit-font-smoothing: none;
       -moz-osx-font-smoothing: grayscale;
     }
     .cursor {
@@ -69,19 +52,10 @@
     }
     @keyframes blink { to { visibility: hidden } }
     #seth-output {
-      white-space: pre-wrap;
-      margin-top: 1rem;
-      background: transparent;
-      border: none;
-      padding: 0;
-      text-align: left;
-      font-family: inherit;
-      font-size: inherit;
-      font-weight: inherit;
-      -webkit-font-smoothing: none;
-      -moz-osx-font-smoothing: grayscale;
-      line-height: 1em;
-      vertical-align: middle;
+      white-space: pre-wrap; margin-top: 1rem;
+      background: transparent; border: none; padding: 0;
+      text-align: left; font: inherit; line-height: 1em;
+      -webkit-font-smoothing: none; -moz-osx-font-smoothing: grayscale;
     }
   </style>
 </head>
@@ -92,6 +66,7 @@
   <pre id="seth-output"></pre>
 
   <script>
+    // ==== Data tables ====
     const elements   = ["water","earth","stone","air","metal","flesh","fire"];
     const daysInSeth = 343, daysInGreg = 365;
 
@@ -195,7 +170,7 @@
             desc  = descriptions[A].slice(head.length),
             day   = ((st - 1) % 49) + 1,
             tarot = tarots[B],
-            divine= divinations[`${A},${B}`] || "...unclear.";
+            divine= divinations[`${A},${B}`] || "...unclear.";  
 
       let out = `${monthNames[m]} ${ordinals[d]}…\n\n`;
       out += `You were born under the head of ${head}${desc}\n\n`;
@@ -206,6 +181,7 @@
       return out;
     }
 
+    // ==== Interaction ====
     const interaction = document.getElementById("seth-interaction");
     const output      = document.getElementById("seth-output");
     const resetBtn    = document.getElementById("reset-btn");
@@ -213,21 +189,17 @@
     let currInp, currUser, currCursor;
 
     function addPrompt(text) {
-      const line = document.createElement("div");
-      line.className = "prompt-line";
-      const label = document.createElement("span");
-      label.className = "prompt-text";
+      const line = document.createElement("div"); line.className = "prompt-line";
+      const label = document.createElement("span"); label.className = "prompt-text";
       label.textContent = text;
-      const wrapper = document.createElement("span");
-      wrapper.className = "input-wrapper";
+      const wrapper = document.createElement("span"); wrapper.className = "input-wrapper";
       const inp = document.createElement("input");
       inp.type = "tel"; inp.inputMode = "numeric"; inp.pattern = "[0-9]*";
       inp.maxLength = 2; inp.autocomplete = "off";
-      inp.setAttribute("enterkeyhint", "done");
-      const user = document.createElement("span");
-      user.className = "user-input";
-      const cursor = document.createElement("span");
-      cursor.className = "cursor"; cursor.textContent = "█";
+      inp.setAttribute("enterkeyhint","done");
+      const user = document.createElement("span"); user.className = "user-input";
+      const cursor = document.createElement("span"); cursor.className = "cursor";
+      cursor.textContent = "█";
       wrapper.append(inp, user, cursor);
       line.append(label, " ", wrapper);
       interaction.append(line);
@@ -242,57 +214,62 @@
     }
 
     function createPrompt(text) {
-      const { inp, user, cursor } = addPrompt(text);
-      currInp = inp; currUser = user; currCursor = cursor;
-      inp.value = ""; user.textContent = "";
-      inp.addEventListener("input", onInput);
-      inp.addEventListener("keydown", onKeyDown);
-      inp.focus();
+      const p = addPrompt(text);
+      currInp = p.inp; currUser = p.user; currCursor = p.cursor;
+      currInp.value = ""; currUser.textContent = "";
+      currInp.addEventListener("input", onInput);
+      currInp.addEventListener("keydown", onKeyDown);
+      currInp.addEventListener("blur", onBlur);
+      currInp.focus();
     }
 
     function finishLine() {
       currInp.removeEventListener("input", onInput);
       currInp.removeEventListener("keydown", onKeyDown);
+      currInp.removeEventListener("blur", onBlur);
       currInp.remove(); currCursor.remove();
     }
 
     function onInput(e) {
-      let buf = e.target.value.replace(/\D/g, "").slice(0,2);
+      let buf = e.target.value.replace(/\D/g,"").slice(0,2);
       e.target.value = buf; currUser.textContent = buf;
-      if (step === 1) {
-        if (buf.length === 2 || (buf.length === 1 && buf !== "1")) confirmMonth();
-      } else if (step === 2) {
-        if (buf.length === 2 || (buf.length === 1 && buf >= "4")) confirmDay();
-      }
+      if (step===1 && (buf.length===2||(buf.length===1&&buf!=="1"))) confirmMonth();
+      if (step===2 && (buf.length===2||(buf.length===1&&buf>="4"))) confirmDay();
     }
 
     function onKeyDown(e) {
-      if (e.key === "Escape") { e.preventDefault(); reset(); }
-      if (e.key === "Enter") {
+      if (e.key==="Escape") { e.preventDefault(); reset(); }
+      if (e.key==="Enter") {
         e.preventDefault();
-        step === 1 ? confirmMonth() : confirmDay();
+        step===1 ? confirmMonth() : confirmDay();
       }
     }
 
+    function onBlur(e) {
+      const buf = e.target.value;
+      if (step===1 && buf==="1") confirmMonth();
+      if (step===2 && buf.length>0) confirmDay();
+    }
+
     function confirmMonth() {
-      const m = parseInt(currInp.value, 10);
-      if (m >= 1 && m <= 12) {
-        monthVal = m; finishLine(); step = 2;
+      const m = parseInt(currInp.value,10);
+      if (m>=1 && m<=12) {
+        monthVal = m; finishLine(); step=2;
         createPrompt("Please, enter your birth day (1-31)...");
       } else {
         alert("Month must be 1–12");
-        currInp.value = ""; currUser.textContent = "";
+        currInp.value=""; currUser.textContent="";
       }
     }
 
     function confirmDay() {
-      const d = parseInt(currInp.value, 10);
-      if (d >= 1 && d <= 31) {
+      const d = parseInt(currInp.value,10);
+      if (d>=1 && d<=31) {
         finishLine();
         output.textContent = generateSeth(monthVal, d);
       } else {
         alert("Day must be 1–31");
-        currInp.value = ""; currUser.textContent = "";
+        currInp.value=""; currUser.textContent="";
       }
     }
 
