@@ -132,12 +132,12 @@
     };
 
     const tarots = {
-      flesh: "Gambler — observant and composed, but driven by material needs, either real or imagined. A constant risk.",
-      air:   "Orphan — empathetic and aware, but unsure of self, always the object of greater wills. An open wound.",
       water: "Lost Sheep — commanding and formidable, but self-serving, even cruel. A sneering devourer.",
-      stone: "Eye-Gouger — adaptable and unbreakable, but always drenched in blood, one way or another. A hidden knife.",
       earth: "Hermit — wise and skilled, but deeply self-isolating. A falling leaf.",
+      stone: "Eye-Gouger — adaptable and unbreakable, but always drenched in blood, one way or another. A hidden knife.",
+      air:   "Orphan — empathetic and aware, but unsure of self, always the object of greater wills. An open wound.",
       metal: "Maverick — alert and self-assured, but arrogant, childish even. A loose tooth.",
+      flesh: "Gambler — observant and composed, but driven by material needs, either real or imagined. A constant risk.",
       fire:  "Heartbreaker — caring and responsive, but never satisfied, quickly bored, resentful. A dark pit."
     };
 
@@ -190,16 +190,21 @@
     let currInp, currUser, currCursor;
 
     function addPrompt(text) {
-      const line = document.createElement("div"); line.className = "prompt-line";
-      const label = document.createElement("span"); label.className = "prompt-text";
+      const line = document.createElement("div");
+      line.className = "prompt-line";
+      const label = document.createElement("span");
+      label.className = "prompt-text";
       label.textContent = text;
-      const wrapper = document.createElement("span"); wrapper.className = "input-wrapper";
+      const wrapper = document.createElement("span");
+      wrapper.className = "input-wrapper";
       const inp = document.createElement("input");
       inp.type = "tel"; inp.inputMode = "numeric"; inp.pattern = "[0-9]*";
       inp.maxLength = 2; inp.autocomplete = "off";
       inp.setAttribute("enterkeyhint","done");
-      const user = document.createElement("span"); user.className = "user-input";
-      const cursor = document.createElement("span"); cursor.className = "cursor"; cursor.textContent = "█";
+      const user = document.createElement("span");
+      user.className = "user-input";
+      const cursor = document.createElement("span");
+      cursor.className = "cursor"; cursor.textContent = "█";
       wrapper.append(inp, user, cursor);
       line.append(label, " ", wrapper);
       interaction.append(line);
@@ -210,63 +215,90 @@
       step = 1; monthVal = null;
       interaction.innerHTML = "";
       output.textContent = "";
-      createPrompt("Please, enter your birth month (1-12)...");
+      createPrompt(
+        "Please, enter your birth month (1-12)…",
+        onInputMonth,
+        onBlurMonth
+      );
     }
 
-    function createPrompt(text) {
+    function createPrompt(text, inputHandler, blurHandler) {
       const p = addPrompt(text);
       currInp    = p.inp;
       currUser   = p.user;
       currCursor = p.cursor;
-      currInp.value = ""; currUser.textContent = "";
-      currInp.addEventListener("input", onInput);
+      currInp.value = "";
+      currUser.textContent = "";
+      currInp.addEventListener("input", inputHandler);
       currInp.addEventListener("keydown", onKeyDown);
-      if (step === 1) currInp.addEventListener("blur", onBlurMonth);
+      if (blurHandler) currInp.addEventListener("blur", blurHandler);
       currInp.focus();
     }
 
     function finishLine() {
-      currInp.removeEventListener("input", onInput);
-      currInp.removeEventListener("keydown", onKeyDown);
-      currInp.removeEventListener("blur", onBlurMonth);
-      currInp.remove(); currCursor.remove();
+      currInp.remove();
+      currCursor.remove();
     }
 
-    function onInput(e) {
+    // Month handlers
+    function onInputMonth(e) {
       let buf = e.target.value.replace(/\D/g,"").slice(0,2);
       e.target.value = buf; currUser.textContent = buf;
-      if (step===1 && (buf.length===2||(buf.length===1&&buf!=="1"))) confirmMonth();
-      if (step===2 && (buf.length===2||(buf.length===1&&buf>="4"))) confirmDay();
+      if (buf.length === 2 || (buf.length === 1 && buf !== "1")) {
+        confirmMonth();
+      }
     }
-
-    function onKeyDown(e) {
-      if (e.key==="Escape") { e.preventDefault(); reset(); }
-      if (e.key==="Enter")  { e.preventDefault(); step===1?confirmMonth():confirmDay(); }
-    }
-
     function onBlurMonth(e) {
       if (e.target.value === "1") confirmMonth();
     }
 
+    // Day handlers
+    function onInputDay(e) {
+      let buf = e.target.value.replace(/\D/g,"").slice(0,2);
+      e.target.value = buf; currUser.textContent = buf;
+      if (buf.length === 2 || (buf.length === 1 && buf >= "4")) {
+        confirmDay();
+      }
+    }
+    function onBlurDay(e) {
+      if (e.target.value.length > 0) confirmDay();
+    }
+
+    function onKeyDown(e) {
+      if (e.key === "Escape") {
+        e.preventDefault(); reset();
+      }
+      if (e.key === "Enter") {
+        e.preventDefault();
+        step === 1 ? confirmMonth() : confirmDay();
+      }
+    }
+
     function confirmMonth() {
       const m = parseInt(currInp.value,10);
-      if (m>=1 && m<=12) {
-        monthVal = m; finishLine(); step=2;
-        createPrompt("Please, enter your birth day (1-31)...");
+      if (m >= 1 && m <= 12) {
+        monthVal = m;
+        finishLine();
+        step = 2;
+        createPrompt(
+          "Please, enter your birth day (1-31)…",
+          onInputDay,
+          onBlurDay
+        );
       } else {
         alert("Month must be 1–12");
-        currInp.value=""; currUser.textContent="";
+        currInp.value = ""; currUser.textContent = "";
       }
     }
 
     function confirmDay() {
       const d = parseInt(currInp.value,10);
-      if (d>=1 && d<=31) {
+      if (d >= 1 && d <= 31) {
         finishLine();
         output.textContent = generateSeth(monthVal, d);
       } else {
         alert("Day must be 1–31");
-        currInp.value=""; currUser.textContent="";
+        currInp.value = ""; currUser.textContent = "";
       }
     }
 
